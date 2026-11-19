@@ -14,3 +14,5 @@
 ```
 
 `~/.local/bin`이 `PATH`에서 기본 Herdr 설치 경로보다 앞에 있어야 합니다. 이미 열린 TUI는 `Ctrl+B`를 누른 뒤 `d`로 분리하고 `herdr`를 다시 실행하면 기존 세션에 연결됩니다.
+
+`endpoints.json`은 머신 목록입니다. 복원할 때 `~/.local/state/herdr/client/endpoints.json`에 복사합니다. 별도 머신이 이미 등록되어 있으면 기존 파일을 먼저 백업하세요. SSH 비밀번호와 키는 별도로 관리합니다.
