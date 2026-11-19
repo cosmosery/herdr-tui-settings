@@ -2,7 +2,7 @@
 
 `config.toml`은 `~/.config/herdr/config.toml`에 복사해서 사용합니다.
 
-`navigator-hl.patch`는 Herdr v0.9.5 소스에 적용합니다. `Ctrl+B`를 누른 뒤 `g`로 이동할 화면을 열면 `h`와 `l`이 왼쪽·오른쪽 화살표처럼 동작합니다.
+`navigator-hl.patch`는 Herdr v0.9.5 소스에 적용합니다. `Ctrl+B`를 누른 뒤 `g`로 이동할 화면을 열면 `h`는 이전 머신, `l`은 다음 머신 이름을 선택합니다. `Enter`로 선택한 머신을 엽니다.
 
 빌드에는 Rust와 Zig 0.16.0이 필요합니다. 다른 Zig 버전이 기본으로 설치되어 있으면 `ZIG` 환경 변수로 0.16.0 실행 파일을 지정합니다. [Zig 공식 배포 목록](https://ziglang.org/download/#release-history)
 

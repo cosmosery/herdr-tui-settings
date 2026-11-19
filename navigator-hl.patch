@@ -1,36 +1,80 @@
 diff --git a/src/client/shell/overlay_input.rs b/src/client/shell/overlay_input.rs
-index 7f797ef..ba8ec19 100644
+index 7f797ef..6ff597b 100644
 --- a/src/client/shell/overlay_input.rs
 +++ b/src/client/shell/overlay_input.rs
-@@ -679,8 +679,13 @@ impl ClientShellState {
+@@ -239,6 +239,33 @@ impl ClientShellState {
+         navigator.selected = rows.get(selected).map(|row| row.target.clone());
+     }
+ 
++    fn move_navigator_machine(&mut self, forward: bool) {
++        let Some(ClientShellOverlay::Navigator(navigator)) = self.overlay.as_mut() else {
++            return;
++        };
++        let rows =
++            render::client_navigator_rows(&self.endpoints, &self.active_endpoint_id, navigator);
++        let Some(selected) =
++            super::aggregate_navigation::navigator_selected_index(&rows, navigator)
++        else {
++            return;
++        };
++        let is_machine =
++            |row: &ClientNavigatorRow| matches!(row.target, ClientNavigatorTarget::Machine { .. });
++        let destination = if forward {
++            rows[selected + 1..].iter().find(|row| is_machine(row))
++        } else {
++            rows[..=selected]
++                .iter()
++                .rev()
++                .filter(|row| is_machine(row))
++                .nth(1)
++        };
++        if let Some(row) = destination {
++            navigator.selected = Some(row.target.clone());
++        }
++    }
++
+     fn move_navigator_workspace(&mut self, forward: bool) {
+         let Some(ClientShellOverlay::Navigator(navigator)) = self.overlay.as_mut() else {
+             return;
+@@ -679,6 +706,11 @@ impl ClientShellState {
                  }
                  return;
              }
--            if matches!(code, KeyCode::Left | KeyCode::Right) && modifiers.is_empty() {
--                self.move_navigator_workspace(code == KeyCode::Right);
-+            if modifiers.is_empty()
-+                && matches!(
-+                    code,
-+                    KeyCode::Left | KeyCode::Right | KeyCode::Char('h') | KeyCode::Char('l')
-+                )
-+            {
-+                self.move_navigator_workspace(matches!(code, KeyCode::Right | KeyCode::Char('l')));
++            if matches!(code, KeyCode::Char('h' | 'l')) && modifiers.is_empty() {
++                self.move_navigator_machine(code == KeyCode::Char('l'));
++                outcome.repaint = true;
++                return;
++            }
+             if matches!(code, KeyCode::Left | KeyCode::Right) && modifiers.is_empty() {
+                 self.move_navigator_workspace(code == KeyCode::Right);
                  outcome.repaint = true;
-                 return;
-             }
 diff --git a/src/client/shell/tests/endpoints.rs b/src/client/shell/tests/endpoints.rs
-index c0a7e52..3f8a5c5 100644
+index c0a7e52..5175f6f 100644
 --- a/src/client/shell/tests/endpoints.rs
 +++ b/src/client/shell/tests/endpoints.rs
-@@ -2781,8 +2781,10 @@ fn navigator_workspace_arrows_cross_machine_headings_without_activating_them() {
+@@ -2801,6 +2801,25 @@ fn navigator_workspace_arrows_cross_machine_headings_without_activating_them() {
+     }
+ }
+ 
++#[test]
++fn navigator_vim_keys_select_machine_headings() {
++    let (mut state, endpoint_id) = state_with_remote();
++    state.open_navigator_overlay();
++    for (key, endpoint_id) in [('l', endpoint_id), ('h', ClientEndpointId::Local)] {
++        let outcome = state.handle_raw_events(vec![RawInputEvent::Key(
++            crate::input::TerminalKey::new(KeyCode::Char(key), KeyModifiers::empty()),
++        )]);
++        assert!(outcome.actions.is_empty());
++        let Some(ClientShellOverlay::Navigator(navigator)) = &state.overlay else {
++            panic!("navigator");
++        };
++        assert_eq!(
++            navigator.selected,
++            Some(ClientNavigatorTarget::Machine { endpoint_id })
++        );
++    }
++}
++
+ #[test]
+ fn navigator_foreign_workspace_heading_keeps_the_workspace_target() {
      let (mut state, endpoint_id) = state_with_remote();
-     state.open_navigator_overlay();
-     for (key, expected_endpoint) in [
--        (KeyCode::Right, endpoint_id),
-+        (KeyCode::Right, endpoint_id.clone()),
-         (KeyCode::Left, ClientEndpointId::Local),
-+        (KeyCode::Char('l'), endpoint_id),
-+        (KeyCode::Char('h'), ClientEndpointId::Local),
-     ] {
-         let outcome = state.handle_raw_events(vec![RawInputEvent::Key(
-             crate::input::TerminalKey::new(key, KeyModifiers::empty()),
