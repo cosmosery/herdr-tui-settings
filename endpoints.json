@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "ssh": [
+    {
+      "id": "e295cbbe816fd552b799aab916189003",
+      "label": "home",
+      "target": "home",
+      "session": "default",
+      "enabled": true
+    },
+    {
+      "id": "4701531eb1530b832a58e7c83c1c1209",
+      "label": "dorm-ubuntu",
+      "target": "dorm-ubuntu",
+      "session": "default",
+      "enabled": true
+    },
+    {
+      "id": "44c5814e74ca7bfa5fdcc440d326818e",
+      "label": "dorm-windows",
+      "target": "dorm-windows",
+      "session": "default",
+      "enabled": true
+    },
+    {
+      "id": "8fa01cc7c8a7058e463e8e6b1d596f9b",
+      "label": "dorm",
+      "target": "dorm",
+      "session": "default",
+      "enabled": true
+    }
+  ]
+}
